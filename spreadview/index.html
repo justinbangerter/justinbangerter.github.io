@@ -3,22 +3,30 @@
     <title>Spreadview Demo</title>
 </head>
 <body>
-    <h1 id="nojs">This site requires JavaScript</h1>
+    <noscript>This site requires JavaScript</noscript>
+    <h1>Spreadview</h1>
     <script src="js/papaparse.min.js"></script>
     <script>
-        var doc = 'https://docs.google.com/spreadsheets/d/1joWXuUGEVKkSKffhg1Ea20lrZoEEk-ORRmrwZ9L17hM';
+        var opts = {
+            doc_csv: 'https://docs.google.com/spreadsheets/d/1joWXuUGEVKkSKffhg1Ea20lrZoEEk-ORRmrwZ9L17hM/pub?output=csv',
+            skip_lines: 1
+        };
 
-        //write link to document
-        var el = document.getElementById('nojs');
-        el.parentElement.removeChild(el);
-        document.write('<h1><a href="'+ doc +'">Spreadsheet</a></h1>');
-
-        //parse csv
-        var doc_csv = doc + '/pub?output=csv';
-        Papa.parse(doc_csv, {
+        Papa.parse(opts.doc_csv, {
             download: true,
             complete: function(results) {
-                console.log(results);
+                var snipped = results.data.slice(opts.skip_lines || 0);
+
+                //xform lines to array of objects indexed by header
+                var headers = snipped[0];
+                var indexed = snipped.slice(1).map(function(line) {
+                    var o = {};
+                    for(var i = 0; i < line.length; i++) {
+                        o[headers[i]] = line[i];
+                    }
+                    return o;
+                });
+                console.log(out);
             }
         });
     </script>
