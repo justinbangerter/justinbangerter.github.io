@@ -1,21 +1,20 @@
-<html>
-    <head>
-        <title>Spreadview Demo</title>
-    </head>
-    <body>
-        <h1 id="nojs">This site requires JavaScript</h1>
-        <script src="js/papaparse.min.js"></script>
-        <script>
-            var doc_csv = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRRUaCgBSqmCukjrcC3WMdKfOwKQ9_uM9Ox4NJJY5Ov7OdOHZqSBlPh68Y0IGlVFbfvVg39Nw6b7JlB/pub?output=csv';
-            var el = document.getElementById('nojs');
-            el.getParent().remove(el);
-            document.write('<h1><a href="'+ doc_csv'">Spreadsheet</a></h1>');
-            Papa.parse(doc_csv, {
-                download: true,
-                complete: function(results) {
-                    console.log(results);
-                }
-            });
-        </script>
-    </body>
-</html>
+<!DOCTYPE html>
+<head>
+    <title>Spreadview Demo</title>
+</head>
+<body>
+    <h1 id="nojs">This site requires JavaScript</h1>
+    <script src="js/papaparse.min.js"></script>
+    <script>
+        var doc_csv = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRRUaCgBSqmCukjrcC3WMdKfOwKQ9_uM9Ox4NJJY5Ov7OdOHZqSBlPh68Y0IGlVFbfvVg39Nw6b7JlB/pub?output=csv';
+        var el = document.getElementById('nojs');
+        el.getParent().remove(el);
+        document.write('<h1><a href="'+ doc_csv'">Spreadsheet</a></h1>');
+        Papa.parse(doc_csv, {
+            download: true,
+            complete: function(results) {
+                console.log(results);
+            }
+        });
+    </script>
+</body>
