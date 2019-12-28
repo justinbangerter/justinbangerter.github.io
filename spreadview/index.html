@@ -2,7 +2,10 @@
 <head>
     <title>Spreadview Demo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="lib/normalize.css"/>
+    <link rel="stylesheet" href="lib/skeleton.css"/>
     <style>
+        body { padding: 0 5px; }
         .card-tmpl {
             border-radius: 5px;
             width: 95%;
@@ -66,12 +69,12 @@
     </div>
 
     <div id="card-list">
-        <input type="text" class="search" placeholder="Search...">
+        <input type="text" class="search" placeholder="Fuzzy Search...">
         <div class="list">
         </div>
     </div>
-    <script src="js/papaparse.min.js"></script>
-    <script src="js/list.min.js"></script>
+    <script src="lib/papaparse.min.js"></script>
+    <script src="lib/list.min.js"></script>
     <script>
         var opts = {
             doc: 'https://docs.google.com/spreadsheets/d/1joWXuUGEVKkSKffhg1Ea20lrZoEEk-ORRmrwZ9L17hM/edit#gid=0',
