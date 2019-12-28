@@ -49,7 +49,10 @@
 </head>
 <body>
     <noscript>This site requires JavaScript</noscript>
-    <h1>Spreadview</h1>
+
+    <a id="spread-link">
+        <h1>Link to Spreadsheet</h1>
+    </a>
 
     <div class="templates">
         <div id="card-tmpl" class="card-tmpl">
@@ -74,14 +77,20 @@
             skip_lines: 1
         };
 
-        var doc_csv = (function() {
-            var csv_call = 'pub?output=csv';
-            var path = opts.doc.split('/');
+        //Google doc object
+        function GDoc(url) {
+            var path = url.split('/');
             if (path[path.length - 1].startsWith('edit')) path.pop();
-            if (path[path.length - 1] != csv_call) path.push(csv_call);
-            return path.join('/');
-        })();
-        Papa.parse(doc_csv, {
+            if (path[path.length - 1].startsWith('pub')) path.pop();
+            this.edit = path.join('/') + '/edit';
+            this.csv = path.join('/') + '/pub?output=csv';
+        }
+
+        var gdoc = new GDoc(opts.doc);
+
+        document.getElementById('spread-link').setAttribute('href', gdoc.edit);
+
+        Papa.parse(gdoc.csv, {
             download: true,
             complete: function(results) {
                 var snipped = results.data.slice(opts.skip_lines || 0);
