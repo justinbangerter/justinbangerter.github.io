@@ -30,7 +30,7 @@
             width: 100%;
             height: 100%;
         }
-        .card-tmpl .name {
+        .card-tmpl .bold {
             font-weight: bold;
         }
         .card-figure {
@@ -48,7 +48,7 @@
             max-height: 75px;
             vertical-align: middle;
         }
-        .templates { display:none; }
+        #templates { display:none; }
     </style>
 </head>
 <body>
@@ -58,14 +58,7 @@
         <h1>Link to Spreadsheet</h1>
     </a>
 
-    <div class="templates">
-        <div id="card-tmpl" class="card-tmpl">
-            <a class="link" href="">
-                <figure class="card-figure"><img class="logo" src=""></figure>
-                <div class="name"></div>
-                <div class="description with a space"></div>
-            </a>
-        </div>
+    <div id="templates">
     </div>
 
     <div id="card-list">
@@ -76,10 +69,30 @@
     <script src="lib/papaparse.min.js"></script>
     <script src="lib/list.min.js"></script>
     <script>
+
+        // Define input
         var opts = {
             doc: 'https://docs.google.com/spreadsheets/d/1joWXuUGEVKkSKffhg1Ea20lrZoEEk-ORRmrwZ9L17hM/edit#gid=0',
-            skip_lines: 1
+            skip_lines: 1,
+            fields: [{
+                name: 'name',
+                type: 'name'
+            },{
+                name: 'description with a space',
+                type: 'description'
+            },{
+                name: 'logo',
+                type: 'icon'
+            },{
+                name: 'link',
+                type: 'cardlink'
+            }]
         };
+
+        // Utils and definitions
+
+        // Cast an array-like object to an array
+        function toArr(args) { return Array.prototype.slice.call(args); }
 
         //Google doc object
         function GDoc(url) {
@@ -90,10 +103,87 @@
             this.csv = path.join('/') + '/pub?output=csv';
         }
 
+        Spreadview = {};
+
+        //Spreadview field types
+        Spreadview.Field = {
+            cardlink: function(name) {
+                this.name = name;
+                this.tmpl = function() {
+                    return '<a class="' + name + '" href="">' + toArr(arguments).join('') + '</a>';
+                };
+                this.valueName = function() {
+                    return {
+                        name: this.name,
+                        attr: 'href'
+                    }
+                }
+            },
+            icon: function(name) {
+                this.name = name;
+                this.tmpl = function() {
+                    return '<figure class="card-figure"><img class="' + name + '" src=""></figure>';
+                };
+                this.valueName = function() {
+                    return {
+                        name: this.name,
+                        attr: 'src'
+                    }
+                };
+            },
+            name: function(name) {
+                this.name = name;
+                this.tmpl = function() {
+                    return '<div class="bold ' + name + '"></div>';
+                };
+                this.valueName = function() {
+                    return this.name;
+                };
+            },
+            description: function(name) {
+                this.name = name;
+                this.tmpl = function() {
+                    return '<div class="' + name + '"></div>';
+                };
+                this.valueName = function() {
+                    return this.name;
+                };
+            }
+        };
+
+        // Main Script
+
+        //cast field definitions to objects and index templates
+        var tmpls = {};
+        var fields = opts.fields.map(function(field) {
+            var typed = new Spreadview.Field[field.type](field.name);
+            tmpls[field.type] = typed.tmpl;
+            return typed;
+        });
+
+        //initialize unset templates with passthrough no ops
+        for (var type in Spreadview.Field) {
+            if (!Spreadview.Field.hasOwnProperty(type)) continue;
+            tmpls[type] = tmpls[type] || function() { return '' + toArr(arguments).join(''); };
+        }
+
+        //instantiate templates
+        document.getElementById('templates').insertAdjacentHTML('beforeend', [
+            '<div id="card-tmpl" class="card-tmpl">',
+                tmpls.cardlink(
+                    tmpls.icon(),
+                    tmpls.name(),
+                    tmpls.description()
+                ),
+            '</div>'
+        ].join(''));
+
+
         var gdoc = new GDoc(opts.doc);
 
         document.getElementById('spread-link').setAttribute('href', gdoc.edit);
 
+        //parse the CSV and create the list when done
         Papa.parse(gdoc.csv, {
             download: true,
             complete: function(results) {
@@ -119,18 +209,9 @@
                 //generate the cards
                 var cardlist = new List('card-list', {
                     item: 'card-tmpl',
-                    valueNames: [
-                        'name',
-                        'description with a space',
-                        {
-                            name: 'logo',
-                            attr: 'src'
-                        },
-                        {
-                            name: 'link',
-                            attr: 'href'
-                        }
-                    ]
+                    valueNames: fields.map(function(field) {
+                        return field.valueName();
+                    })
                 }, indexed);
             }
         });
